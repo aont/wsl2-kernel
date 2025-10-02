@@ -10,7 +10,7 @@ A short, practical guide for building a WSL2 kernel (using a Singularity/Apptain
 * A running Linux kernel often exposes its compiled configuration at `/proc/config.gz`, so extracting that gives you a good starting `.config`. ([Super User][2])
 * Building inside an isolated container (Singularity/Apptainer) keeps the host clean; Singularity supports `--fakeroot` builds which let you perform root-like operations when the host supports the required features. ([Sylabs][3])
 * To make WSL use your custom kernel, configure the `kernel` path in `%UserProfile%\.wslconfig`. `.wslconfig` is the supported global WSL2 configuration file. ([Microsoft Learn][4])
-* The `user@host` string shown in `uname -v` / `/proc/version` is controlled by `KBUILD_BUILD_USER` and `KBUILD_BUILD_HOST` during the kernel build; exporting them changes what’s embedded in the resulting kernel. ([Kernel ドキュメント][5])
+* The `user@host` string shown in `uname -v` / `/proc/version` is controlled by `KBUILD_BUILD_USER` and `KBUILD_BUILD_HOST` during the kernel build; exporting them changes what’s embedded in the resulting kernel. ([Kernel Document][5])
 
 ---
 
