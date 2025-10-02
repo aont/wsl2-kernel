@@ -34,7 +34,7 @@ echo "$KERNELVERSION"
 gzip -d -c /proc/config.gz > config.txt   # extract running config
 ```
 
-(If `/proc/config.gz` isn’t present, use `scripts/extract-ikconfig` on a kernel image — many kernels embed the config.) ([Super User][2])
+<!-- (If `/proc/config.gz` isn’t present, use `scripts/extract-ikconfig` on a kernel image — many kernels embed the config.) ([Super User][2]) -->
 
 2. **Download Microsoft’s WSL2 kernel source tarball for that version:**
 
@@ -43,7 +43,7 @@ curl -LO "https://github.com/microsoft/WSL2-Linux-Kernel/archive/refs/tags/linux
 tar xzf "linux-msft-wsl-${KERNELVERSION}.tar.gz"
 ```
 
-(Or `git clone` the repo and checkout the matching tag.) ([GitHub][1])
+<!-- (Or `git clone` the repo and checkout the matching tag.) ([GitHub][1]) -->
 
 3. **Build image/prepare container (example Singularity def):**
 
@@ -77,7 +77,6 @@ cp config.txt .config          # use running config as baseline
 # or: cp Microsoft/config-wsl .config
 # append your custom options
 echo '
-# Customization
 CONFIG_XFS_FS=y
 CONFIG_F2FS_FS=y
 CONFIG_BLK_DEV_NBD=y
