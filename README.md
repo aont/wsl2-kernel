@@ -96,7 +96,7 @@ export KBUILD_BUILD_USER="aont"
 export KBUILD_BUILD_HOST="aont"
 ```
 
-Setting those overrides what the kernel embeds for the build-user and -host. ([Kernel ドキュメント][5])
+Setting those overrides what the kernel embeds for the build-user and -host. ([Kernel Document][5])
 
 6. **Build:**
 
@@ -129,7 +129,7 @@ Restart WSL (`wsl --shutdown`) and start your distro. `.wslconfig` is the correc
 * **Config extraction:** `/proc/config.gz` is the easiest way to get a baseline `.config`; if it doesn’t exist, try `scripts/extract-ikconfig` against the kernel image. ([Super User][2])
 * **Singularity vs Docker:** You used Singularity which is fine — it can build images from definition files and supports `--fakeroot`. If you prefer Docker, a similar approach (container with build tools) will also work, but Singularity often fits HPC / multi-user systems better. ([Sylabs][3])
 * **Spaces in `.wslconfig` paths:** `.wslconfig` parsing can be picky about escaping; prefer paths without spaces or use exact documented formatting if necessary. (Windows `%UserProfile%\.wslconfig` is the right file.) ([Microsoft Learn][4])
-* **Reproducibility:** If you need reproducible or machine-independent builds, set `KBUILD_BUILD_USER`, `KBUILD_BUILD_HOST`, and consider `-fdebug-prefix-map` / other kbuild flags as documented. ([Kernel ドキュメント][6])
+* **Reproducibility:** If you need reproducible or machine-independent builds, set `KBUILD_BUILD_USER`, `KBUILD_BUILD_HOST`, and consider `-fdebug-prefix-map` / other kbuild flags as documented. ([Kernel Document][6])
 
 ---
 
@@ -139,7 +139,7 @@ Restart WSL (`wsl --shutdown`) and start your distro. `.wslconfig` is the correc
 * How to obtain kernel config from a running kernel (`/proc/config.gz`). ([Super User][2])
 * Microsoft / community guides on building WSL custom kernels. ([Microsoft Learn][7])
 * Singularity / Apptainer definition files and `--fakeroot` build docs. ([Sylabs][3])
-* kbuild docs: `KBUILD_BUILD_USER` and `KBUILD_BUILD_HOST`. ([Kernel ドキュメント][5])
+* kbuild docs: `KBUILD_BUILD_USER` and `KBUILD_BUILD_HOST`. ([Kernel Document][5])
 
 ---
 
