@@ -141,15 +141,6 @@ Restart WSL (`wsl --shutdown`) and start your distro. `.wslconfig` is the correc
 * Singularity / Apptainer definition files and `--fakeroot` build docs. ([Sylabs][3])
 * kbuild docs: `KBUILD_BUILD_USER` and `KBUILD_BUILD_HOST`. ([Kernel Document][5])
 
----
-
-If you’d like, I can:
-
-* Turn this into a ready-to-run `Makefile` + Singularity def that automates download, config patching, build, and copies the `bzImage` into a Windows-accessible location; or
-* Add a minimal `README.md` (English + short Japanese notes) you can drop in your git repo.
-
-Which one do you want next?
-
 [1]: https://github.com/microsoft/WSL2-Linux-Kernel "microsoft/WSL2-Linux-Kernel: The source for ..."
 [2]: https://superuser.com/questions/287371/how-to-obtain-kernel-config-from-currently-running-linux-system "How to obtain kernel config from currently running Linux ..."
 [3]: https://docs.sylabs.io/guides/4.1/user-guide/build_a_container.html "Build a Container — SingularityCE User Guide 4.1 ..."
