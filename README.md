@@ -12,7 +12,7 @@ KERNELVERSION=$(uname -r | sed -e 's/-.*$//g')
 echo "$KERNELVERSION"
 # For example, it's `6.6.87.2` here.
 
-# the configuration of stock kernel.
+# configuration of the stock kernel.
 gzip -d -c /proc/config.gz > config.txt
 
 # Download kernel source
@@ -40,12 +40,11 @@ singularity build --fakeroot ubuntu2404.sif ubuntu2404.def
 # open singularity shell
 singularity shell ubuntu2404.sif
 
-# configuration
 cd WSL2-Linux-Kernel-linux-msft-wsl-6.6.87.2
 
 cp config.txt .config
 # or
- cp Microsoft/config-wsl .config
+cp Microsoft/config-wsl .config
 
 # customize
 echo '
