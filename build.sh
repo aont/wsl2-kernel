@@ -53,8 +53,8 @@ CONFIG_ANDROID_BINDER_IPC=y
 CONFIG_ANDROID_BINDER_DEVICES="binder,hwbinder,vndbinder"
 ' >> .config
 
-make menuconfig
-# then `Exit`
+# Keep the existing .config while filling in any new Kconfig options introduced in the tree with their default values, without requiring user interaction.
+make olddefconfig
 
 # branding
 export KBUILD_BUILD_USER="aont"
