@@ -62,6 +62,10 @@ CONFIG_ANDROID_BINDER_DEVICES="binder,hwbinder,vndbinder"
 make menuconfig
 # then `Exit`
 
+# branding
+export KBUILD_BUILD_USER="aont"
+export KBUILD_BUILD_HOST="aont"
+
 # build
 make -kj $(nproc)
 # wait for a long time ...
