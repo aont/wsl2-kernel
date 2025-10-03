@@ -77,6 +77,7 @@ cp config.txt .config          # use running config as baseline
 # or: cp Microsoft/config-wsl .config
 # append your custom options
 echo '
+CONFIG_BRIDGE=y
 CONFIG_XFS_FS=y
 CONFIG_F2FS_FS=y
 CONFIG_BLK_DEV_NBD=y
