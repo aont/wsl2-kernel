@@ -76,16 +76,37 @@ cd WSL2-Linux-Kernel-linux-msft-wsl-${KERNELVERSION}
 cp config.txt .config          # use running config as baseline
 # or: cp Microsoft/config-wsl .config
 # append your custom options
-echo '
-CONFIG_BRIDGE=y
-CONFIG_XFS_FS=y
-CONFIG_F2FS_FS=y
-CONFIG_BLK_DEV_NBD=y
-CONFIG_BCACHE=y
-CONFIG_ANDROID=y
-CONFIG_ANDROID_BINDER_IPC=y
-CONFIG_ANDROID_BINDER_DEVICES="binder,hwbinder,vndbinder"
-' >> .config
+./scripts/config --file .config \
+    --enable CONFIG_XFS_FS \
+    --enable CONFIG_F2FS_FS \
+    --enable CONFIG_BLK_DEV_NBD \
+    --enable CONFIG_BCACHE \
+    --enable CONFIG_ANDROID \
+    --enable CONFIG_ANDROID_BINDER_IPC \
+    --set-str CONFIG_ANDROID_BINDER_DEVICES "binder,hwbinder,vndbinder" \
+    --enable CONFIG_ANDROID_BINDERFS \
+    --enable CONFIG_NETFILTER \
+    --enable CONFIG_NETFILTER_ADVANCED \
+    --enable CONFIG_IP_NF_IPTABLES \
+    --enable CONFIG_IP_NF_FILTER \
+    --enable CONFIG_IP_NF_MANGLE \
+    --enable CONFIG_IP_NF_RAW \
+    --enable CONFIG_IP_NF_TARGET_REJECT \
+    --enable CONFIG_IP_NF_TARGET_LOG \
+    --enable CONFIG_IP_NF_TARGET_MASQUERADE \
+    --enable CONFIG_IP_NF_TARGET_REDIRECT \
+    --enable CONFIG_IP_NF_MATCH_ADDRTYPE \
+    --enable CONFIG_IP_NF_MATCH_IPRANGE \
+    --enable CONFIG_IP_NF_MATCH_MAC \
+    --enable CONFIG_IP_NF_MATCH_MULTIPORT \
+    --enable CONFIG_IP_NF_MATCH_TTL \
+    --enable CONFIG_NF_NAT \
+    --enable CONFIG_IP_NF_NAT \
+    --enable CONFIG_NF_TABLES \
+    --enable CONFIG_NETFILTER_XT_TARGET_CHECKSUM \
+    --enable CONFIG_NETFILTER_XTABLES \
+    --enable CONFIG_BRIDGE \
+    --enable CONFIG_STAGING
 # Keep the existing .config while filling in any new Kconfig options introduced in the tree with their default values, without requiring user interaction.
 make olddefconfig
 ```
