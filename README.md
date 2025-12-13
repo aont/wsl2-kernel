@@ -101,12 +101,23 @@ cp config.txt .config          # use running config as baseline
     --enable CONFIG_IP_NF_MATCH_MULTIPORT \
     --enable CONFIG_IP_NF_MATCH_TTL \
     --enable CONFIG_NF_NAT \
-    --enable CONFIG_IP_NF_NAT \
     --enable CONFIG_NF_TABLES \
+    --enable CONFIG_NF_NAT_IPV4 \
+    --enable CONFIG_NF_CONNTRACK_IPV4 \
+    --enable CONFIG_IP_NF_NAT \
     --enable CONFIG_NETFILTER_XT_TARGET_CHECKSUM \
     --enable CONFIG_NETFILTER_XTABLES \
+    --enable CONFIG_NETFILTER_XT_MATCH_ADDRTYPE \
+    --enable CONFIG_NETFILTER_XT_TARGET_REDIRECT \
+    --enable CONFIG_NETFILTER_XT_TARGET_NETMAP \
+    --enable CONFIG_NETFILTER_XT_MATCH_CONNTRACK \
     --enable CONFIG_BRIDGE \
-    --enable CONFIG_STAGING
+    --enable CONFIG_BRIDGE_NETFILTER \
+    --enable CONFIG_STAGING \
+    --enable CONFIG_NFT_CHAIN_NAT \
+    --enable CONFIG_NFT_COMPAT \
+    --enable CONFIG_NFT_REDIR \
+    --enable CONFIG_NFT_CT
 # Keep the existing .config while filling in any new Kconfig options introduced in the tree with their default values, without requiring user interaction.
 make olddefconfig
 ```
