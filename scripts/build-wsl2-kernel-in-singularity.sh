@@ -9,11 +9,13 @@ set -euo pipefail
 usage() {
   cat <<'USAGE'
 Usage:
-  build-wsl2-kernel-in-singularity.sh [-k <kernel_version>] [-w <workdir>]
+  build-wsl2-kernel-in-singularity.sh [-k <kernel_version>|latest-tag-date] [-w <workdir>]
 
 Options:
   -k <kernel_version>  Kernel version suffix used in source directory name.
                        Default: uname -r stripped after the first '-'.
+                       Special value: latest-tag-date (resolve newest upstream
+                       linux-msft-wsl-* tag by tag date).
   -w <workdir>         Directory containing config.txt and source tree.
                        Default: current directory.
 
@@ -21,6 +23,41 @@ Environment variables:
   KBUILD_BUILD_USER    Optional build user branding.
   KBUILD_BUILD_HOST    Optional build host branding.
 USAGE
+}
+
+resolve_latest_tag_by_date() {
+  local workdir="$1"
+  local repo_url="https://github.com/microsoft/WSL2-Linux-Kernel.git"
+  local repo_dir
+  local candidate
+
+  for candidate in \
+    "$workdir/WSL2-Linux-Kernel" \
+    "$workdir/WSL2-Linux-Kernel.git" \
+    "$workdir/.wsl2-kernel-tags-repo"; do
+    if [[ -d "$candidate/.git" ]]; then
+      repo_dir="$candidate"
+      break
+    fi
+  done
+
+  if [[ -z "${repo_dir:-}" ]]; then
+    repo_dir="$workdir/.wsl2-kernel-tags-repo"
+    mkdir -p "$repo_dir"
+    git -C "$repo_dir" init -q
+    if ! git -C "$repo_dir" remote get-url origin >/dev/null 2>&1; then
+      git -C "$repo_dir" remote add origin "$repo_url"
+    fi
+  fi
+
+  git -C "$repo_dir" fetch -q --tags origin
+
+  git -C "$repo_dir" for-each-ref \
+    --sort=-creatordate \
+    --format='%(refname:strip=2)' \
+    'refs/tags/linux-msft-wsl-*' \
+    | sed -E 's/^linux-msft-wsl-//' \
+    | head -n 1
 }
 
 KERNEL_VERSION="$(uname -r | sed -e 's/-.*$//g')"
@@ -38,6 +75,15 @@ while getopts ":k:w:h" opt; do
     \?) echo "Error: invalid option -$OPTARG" >&2; usage; exit 1 ;;
   esac
 done
+
+if [[ "$KERNEL_VERSION" == "latest-tag-date" ]]; then
+  KERNEL_VERSION="$(resolve_latest_tag_by_date "$WORKDIR")"
+  if [[ -z "$KERNEL_VERSION" ]]; then
+    echo "Error: failed to resolve latest linux-msft-wsl-* tag by date." >&2
+    exit 1
+  fi
+  echo "Resolved latest kernel version by tag date: ${KERNEL_VERSION}"
+fi
 
 SOURCE_DIR="${WORKDIR}/WSL2-Linux-Kernel-linux-msft-wsl-${KERNEL_VERSION}"
 BASE_CONFIG="${WORKDIR}/config.txt"

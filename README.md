@@ -34,6 +34,36 @@ echo "$KERNELVERSION"
 gzip -d -c /proc/config.gz > config.txt   # extract running config
 ```
 
+If you prefer to pick the **latest upstream WSL2 tag by tag date** (instead of version sort),
+reuse a local Git repo (or a small cache repo) and sort tags by `creatordate`:
+
+```bash
+KERNELVERSION="$({
+  # Reuse local git repo if present; otherwise keep a small cache repo.
+  repodir="$(pwd)/WSL2-Linux-Kernel"
+  if [ ! -d "$repodir/.git" ]; then
+    repodir="$(pwd)/.wsl2-kernel-tags-repo"
+    mkdir -p "$repodir"
+    git -C "$repodir" init -q
+    git -C "$repodir" remote add origin https://github.com/microsoft/WSL2-Linux-Kernel.git 2>/dev/null || true
+  fi
+  git -C "$repodir" fetch -q --tags origin
+  git -C "$repodir" for-each-ref \
+    --sort=-creatordate \
+    --format='%(refname:strip=2)' \
+    'refs/tags/linux-msft-wsl-*' \
+    | sed -E 's/^linux-msft-wsl-//' \
+    | head -n 1
+})"
+echo "$KERNELVERSION"
+```
+
+The build helper script now supports this directly too:
+
+```bash
+./scripts/build-wsl2-kernel-in-singularity.sh -k latest-tag-date
+```
+
 <!-- (If `/proc/config.gz` isn’t present, use `scripts/extract-ikconfig` on a kernel image — many kernels embed the config.) ([Super User][2]) -->
 
 2. **Download Microsoft’s WSL2 kernel source tarball for that version:**
