@@ -141,6 +141,25 @@ file arch/x86/boot/bzImage
 
 After a successful build you’ll see `bzImage` and other artifacts; the version string will include `KBUILD_BUILD_USER@KBUILD_BUILD_HOST` if set.
 
+
+### Automation script (inside Singularity)
+
+If you want to automate only the steps that run *inside* the Singularity/Apptainer container (prepare `.config` + build), use:
+
+```bash
+./scripts/build-wsl2-kernel-in-singularity.sh -k "${KERNELVERSION}"
+```
+
+Optional branding values can be set before execution:
+
+```bash
+export KBUILD_BUILD_USER="aont"
+export KBUILD_BUILD_HOST="aont"
+./scripts/build-wsl2-kernel-in-singularity.sh -k "${KERNELVERSION}"
+```
+
+The script expects `config.txt` and `WSL2-Linux-Kernel-linux-msft-wsl-${KERNELVERSION}` to exist in the working directory.
+
 7. **Place the kernel and configure Windows:**
 
 * Copy `arch/x86/boot/bzImage` somewhere on Windows, e.g. `C:\Users\aont\wsl\bzImage`.
