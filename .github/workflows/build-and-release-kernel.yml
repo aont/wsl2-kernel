@@ -1,0 +1,128 @@
+name: Build and Release WSL2 Kernel
+
+on:
+  workflow_dispatch:
+    inputs:
+      kernel_version:
+        description: "WSL2 kernel version (e.g. 6.6.87.2). Empty = latest tag from microsoft/WSL2-Linux-Kernel"
+        required: false
+        default: ""
+      release_tag:
+        description: "GitHub Release tag to create/update (e.g. wsl2-kernel-v6.6.87.2)"
+        required: true
+      release_name:
+        description: "GitHub Release name"
+        required: false
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            flex \
+            bison \
+            libssl-dev \
+            libelf-dev \
+            libncurses-dev \
+            bc \
+            python3 \
+            dwarves \
+            cpio \
+            curl \
+            tar \
+            xz-utils \
+            file
+
+      - name: Resolve kernel version
+        id: resolve
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          INPUT_VERSION="${{ github.event.inputs.kernel_version }}"
+          if [[ -n "$INPUT_VERSION" ]]; then
+            VERSION="$INPUT_VERSION"
+          else
+            VERSION="$(
+              git ls-remote --tags --refs https://github.com/microsoft/WSL2-Linux-Kernel.git \
+                | awk -F/ '{print $NF}' \
+                | sed -E 's/^linux-msft-wsl-//' \
+                | sort -V \
+                | tail -n 1
+            )"
+          fi
+
+          echo "kernel_version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "Resolved kernel version: $VERSION"
+
+      - name: Download WSL2 kernel source
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="${{ steps.resolve.outputs.kernel_version }}"
+
+          curl -fL -o "linux-msft-wsl-${VERSION}.tar.gz" \
+            "https://github.com/microsoft/WSL2-Linux-Kernel/archive/refs/tags/linux-msft-wsl-${VERSION}.tar.gz"
+
+          tar xzf "linux-msft-wsl-${VERSION}.tar.gz"
+
+      - name: Prepare baseline config for build script
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="${{ steps.resolve.outputs.kernel_version }}"
+          SOURCE_DIR="WSL2-Linux-Kernel-linux-msft-wsl-${VERSION}"
+
+          cp "${SOURCE_DIR}/Microsoft/config-wsl" config.txt
+
+      - name: Build kernel via repository script
+        shell: bash
+        env:
+          KBUILD_BUILD_USER: github-actions
+          KBUILD_BUILD_HOST: github-runner
+        run: |
+          set -euo pipefail
+          VERSION="${{ steps.resolve.outputs.kernel_version }}"
+
+          chmod +x scripts/build-wsl2-kernel-in-singularity.sh
+          ./scripts/build-wsl2-kernel-in-singularity.sh -k "$VERSION" -w "$GITHUB_WORKSPACE"
+
+      - name: Package build artifact
+        id: package
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION="${{ steps.resolve.outputs.kernel_version }}"
+          SOURCE_DIR="WSL2-Linux-Kernel-linux-msft-wsl-${VERSION}"
+
+          ARTIFACT_NAME="bzImage-${VERSION}"
+          cp "${SOURCE_DIR}/arch/x86/boot/bzImage" "$ARTIFACT_NAME"
+
+          echo "artifact_name=$ARTIFACT_NAME" >> "$GITHUB_OUTPUT"
+          echo "artifact_path=$GITHUB_WORKSPACE/$ARTIFACT_NAME" >> "$GITHUB_OUTPUT"
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.package.outputs.artifact_name }}
+          path: ${{ steps.package.outputs.artifact_path }}
+
+      - name: Create or update GitHub Release and upload kernel
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event.inputs.release_tag }}
+          name: ${{ github.event.inputs.release_name != '' && github.event.inputs.release_name || format('WSL2 kernel {0}', steps.resolve.outputs.kernel_version) }}
+          files: ${{ steps.package.outputs.artifact_path }}
+          generate_release_notes: true
