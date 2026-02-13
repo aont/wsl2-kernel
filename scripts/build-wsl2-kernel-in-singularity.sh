@@ -55,6 +55,20 @@ fi
 cd "$SOURCE_DIR"
 cp "$BASE_CONFIG" .config
 
+echo "Converting all module (=m) configs to built-in (=y) in .config ..."
+mapfile -t MODULE_SYMBOLS < <(awk -F= '/^CONFIG_[A-Za-z0-9_]+=m$/ {print $1}' .config)
+
+if [[ "${#MODULE_SYMBOLS[@]}" -gt 0 ]]; then
+  MODULE_ENABLE_ARGS=()
+  for sym in "${MODULE_SYMBOLS[@]}"; do
+    MODULE_ENABLE_ARGS+=(--enable "$sym")
+  done
+  ./scripts/config --file .config "${MODULE_ENABLE_ARGS[@]}"
+  echo "Converted ${#MODULE_SYMBOLS[@]} config symbols from module to built-in."
+else
+  echo "No module config symbols found in baseline .config."
+fi
+
 ./scripts/config --file .config \
   --enable CONFIG_XFS_FS \
   --enable CONFIG_F2FS_FS \
