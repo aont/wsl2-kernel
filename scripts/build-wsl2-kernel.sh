@@ -132,7 +132,15 @@ if [[ ! -x "$VHDX_SCRIPT_PATH" ]]; then
 fi
 
 make INSTALL_MOD_PATH="$MODULES_STAGE_DIR" modules_install
-"$VHDX_SCRIPT_PATH" "$MODULES_STAGE_DIR" "$KERNEL_RELEASE" "$MODULES_VHDX_PATH"
+
+# gen_modules_vhdx.sh uses losetup and requires elevated privileges on
+# GitHub-hosted runners.
+if command -v sudo >/dev/null 2>&1; then
+  sudo "$VHDX_SCRIPT_PATH" "$MODULES_STAGE_DIR" "$KERNEL_RELEASE" "$MODULES_VHDX_PATH"
+  sudo chown "$(id -u):$(id -g)" "$MODULES_VHDX_PATH"
+else
+  "$VHDX_SCRIPT_PATH" "$MODULES_STAGE_DIR" "$KERNEL_RELEASE" "$MODULES_VHDX_PATH"
+fi
 
 echo
 echo "Done. Kernel image: ${SOURCE_DIR}/arch/x86/boot/bzImage"
