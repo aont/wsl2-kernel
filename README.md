@@ -75,11 +75,12 @@ The script expects `config.txt` and `WSL2-Linux-Kernel-linux-msft-wsl-${KERNELVE
 4. **Place the kernel and configure Windows:**
 
 * Copy `arch/x86/boot/bzImage` somewhere on Windows, e.g. `C:\Users\aont\wsl\bzImage`.
-* Create or edit `%UserProfile%\.wslconfig` with:
+* Create or edit `%UserProfile%\.wslconfig`. The kernel and kernel modules can be configured by writing:
 
 ```ini
 [wsl2]
-kernel=C:\\Users\\aont\\wsl\\bzImage
+kernel=C:\\bzImage
+kernelModules=C:\\modules.vhdx
 # debugConsole=true
 ```
 
