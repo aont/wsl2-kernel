@@ -6,8 +6,9 @@ on:
       kernel_tag:
         description: "WSL2 kernel tag from microsoft/WSL2-Linux-Kernel (e.g. linux-msft-wsl-6.6.87.2)"
         required: true
+        default: linux-msft-wsl-6.6.114.1
       release_tag:
-        description: "Release tag to create/update in this repository (defaults to kernel_tag)"
+        description: "Release tag to create/update in this repository (defaults to {kernel_tag}-{commit id}-{date})"
         required: false
   push:
     tags:
@@ -39,7 +40,9 @@ jobs:
           fi
 
           if [[ -z "$RELEASE_TAG" ]]; then
-            RELEASE_TAG="$KERNEL_TAG"
+            BUILD_DATE="$(date -u +%Y%m%d)"
+            COMMIT_ID="${GITHUB_SHA::7}"
+            RELEASE_TAG="${KERNEL_TAG}-${COMMIT_ID}-${BUILD_DATE}"
           fi
 
           if [[ "$KERNEL_TAG" != linux-msft-wsl-* ]]; then
