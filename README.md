@@ -74,7 +74,7 @@ Singularity `--fakeroot` allows non-root users to run builds that require root-l
 Use the automation script for kernel tree preparation and build steps that run *inside* the Singularity/Apptainer container:
 
 ```bash
-./scripts/build-wsl2-kernel-in-singularity.sh -k "${KERNELVERSION}"
+./scripts/build-wsl2-kernel.sh -k "${KERNELVERSION}"
 ```
 
 Optional branding values can still be set before execution:
@@ -82,10 +82,10 @@ Optional branding values can still be set before execution:
 ```bash
 export KBUILD_BUILD_USER="aont"
 export KBUILD_BUILD_HOST="aont"
-./scripts/build-wsl2-kernel-in-singularity.sh -k "${KERNELVERSION}"
+./scripts/build-wsl2-kernel.sh -k "${KERNELVERSION}"
 ```
 
-The script expects `config.txt` and `WSL2-Linux-Kernel-linux-msft-wsl-${KERNELVERSION}` to exist in the working directory.
+The script expects `config.txt` and `WSL2-Linux-Kernel-linux-msft-wsl-${KERNELVERSION}` to exist in the working directory. It sets requested features as modules where possible and builds both `bzImage` and kernel modules.
 
 5. **Place the kernel and configure Windows:**
 
