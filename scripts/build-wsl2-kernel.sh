@@ -17,6 +17,10 @@ Options:
   -w <workdir>         Directory containing config.txt and source tree.
                        Default: current directory.
 
+Outputs:
+  - arch/x86/boot/bzImage
+  - modules-<kernelrelease>.vhdx (generated via Microsoft/scripts/gen_modules_vhdx.sh)
+
 Environment variables:
   KBUILD_BUILD_USER    Optional build user branding.
   KBUILD_BUILD_HOST    Optional build host branding.
@@ -116,6 +120,22 @@ echo "KBUILD_BUILD_HOST=${KBUILD_BUILD_HOST:-<not set>}"
 make -j"$(nproc)" bzImage modules
 file arch/x86/boot/bzImage
 
+KERNEL_RELEASE="$(make -s kernelrelease)"
+MODULES_STAGE_DIR="$(mktemp -d)"
+MODULES_VHDX_PATH="${SOURCE_DIR}/modules-${KERNEL_RELEASE}.vhdx"
+VHDX_SCRIPT_PATH="${SOURCE_DIR}/Microsoft/scripts/gen_modules_vhdx.sh"
+
+trap 'rm -rf "${MODULES_STAGE_DIR}"' EXIT
+
+if [[ ! -x "$VHDX_SCRIPT_PATH" ]]; then
+  echo "Error: Microsoft modules VHDX script not found or not executable: $VHDX_SCRIPT_PATH" >&2
+  exit 1
+fi
+
+make INSTALL_MOD_PATH="$MODULES_STAGE_DIR" modules_install
+"$VHDX_SCRIPT_PATH" "$MODULES_STAGE_DIR" "$KERNEL_RELEASE" "$MODULES_VHDX_PATH"
+
 echo
 echo "Done. Kernel image: ${SOURCE_DIR}/arch/x86/boot/bzImage"
 echo "Done. Kernel modules are built in: ${SOURCE_DIR}"
+echo "Done. Kernel modules VHDX: ${MODULES_VHDX_PATH}"
