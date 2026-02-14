@@ -59,58 +59,57 @@ fi
 cd "$SOURCE_DIR"
 cp "$BASE_CONFIG" .config
 
-set_module_or_enable() {
+config_args=(--file .config)
+
+add_enable_config() {
   local symbol="$1"
 
-  if ./scripts/config --file .config --module "$symbol" >/dev/null 2>&1; then
-    echo "set $symbol=m"
-  else
-    ./scripts/config --file .config --enable "$symbol"
-    echo "set $symbol=y"
-  fi
+  config_args+=(--enable "$symbol")
 }
 
-set_module_or_enable CONFIG_XFS_FS
-set_module_or_enable CONFIG_F2FS_FS
-set_module_or_enable CONFIG_BLK_DEV_NBD
-set_module_or_enable CONFIG_BCACHE
-set_module_or_enable CONFIG_ANDROID
-set_module_or_enable CONFIG_ANDROID_BINDER_IPC
-./scripts/config --file .config --set-str CONFIG_ANDROID_BINDER_DEVICES "binder,hwbinder,vndbinder"
-set_module_or_enable CONFIG_ANDROID_BINDERFS
-set_module_or_enable CONFIG_NETFILTER
-set_module_or_enable CONFIG_NETFILTER_ADVANCED
-set_module_or_enable CONFIG_IP_NF_IPTABLES
-set_module_or_enable CONFIG_IP_NF_FILTER
-set_module_or_enable CONFIG_IP_NF_MANGLE
-set_module_or_enable CONFIG_IP_NF_RAW
-set_module_or_enable CONFIG_IP_NF_TARGET_REJECT
-set_module_or_enable CONFIG_IP_NF_TARGET_LOG
-set_module_or_enable CONFIG_IP_NF_TARGET_MASQUERADE
-set_module_or_enable CONFIG_IP_NF_TARGET_REDIRECT
-set_module_or_enable CONFIG_IP_NF_MATCH_ADDRTYPE
-set_module_or_enable CONFIG_IP_NF_MATCH_IPRANGE
-set_module_or_enable CONFIG_IP_NF_MATCH_MAC
-set_module_or_enable CONFIG_IP_NF_MATCH_MULTIPORT
-set_module_or_enable CONFIG_IP_NF_MATCH_TTL
-set_module_or_enable CONFIG_NF_NAT
-set_module_or_enable CONFIG_NF_TABLES
-set_module_or_enable CONFIG_NF_NAT_IPV4
-set_module_or_enable CONFIG_NF_CONNTRACK_IPV4
-set_module_or_enable CONFIG_IP_NF_NAT
-set_module_or_enable CONFIG_NETFILTER_XT_TARGET_CHECKSUM
-set_module_or_enable CONFIG_NETFILTER_XTABLES
-set_module_or_enable CONFIG_NETFILTER_XT_MATCH_ADDRTYPE
-set_module_or_enable CONFIG_NETFILTER_XT_TARGET_REDIRECT
-set_module_or_enable CONFIG_NETFILTER_XT_TARGET_NETMAP
-set_module_or_enable CONFIG_NETFILTER_XT_MATCH_CONNTRACK
-set_module_or_enable CONFIG_BRIDGE
-set_module_or_enable CONFIG_BRIDGE_NETFILTER
-set_module_or_enable CONFIG_STAGING
-set_module_or_enable CONFIG_NFT_CHAIN_NAT
-set_module_or_enable CONFIG_NFT_COMPAT
-set_module_or_enable CONFIG_NFT_REDIR
-set_module_or_enable CONFIG_NFT_CT
+add_enable_config CONFIG_XFS_FS
+add_enable_config CONFIG_F2FS_FS
+add_enable_config CONFIG_BLK_DEV_NBD
+add_enable_config CONFIG_BCACHE
+add_enable_config CONFIG_ANDROID
+add_enable_config CONFIG_ANDROID_BINDER_IPC
+config_args+=(--set-str CONFIG_ANDROID_BINDER_DEVICES "binder,hwbinder,vndbinder")
+add_enable_config CONFIG_ANDROID_BINDERFS
+add_enable_config CONFIG_NETFILTER
+add_enable_config CONFIG_NETFILTER_ADVANCED
+add_enable_config CONFIG_IP_NF_IPTABLES
+add_enable_config CONFIG_IP_NF_FILTER
+add_enable_config CONFIG_IP_NF_MANGLE
+add_enable_config CONFIG_IP_NF_RAW
+add_enable_config CONFIG_IP_NF_TARGET_REJECT
+add_enable_config CONFIG_IP_NF_TARGET_LOG
+add_enable_config CONFIG_IP_NF_TARGET_MASQUERADE
+add_enable_config CONFIG_IP_NF_TARGET_REDIRECT
+add_enable_config CONFIG_IP_NF_MATCH_ADDRTYPE
+add_enable_config CONFIG_IP_NF_MATCH_IPRANGE
+add_enable_config CONFIG_IP_NF_MATCH_MAC
+add_enable_config CONFIG_IP_NF_MATCH_MULTIPORT
+add_enable_config CONFIG_IP_NF_MATCH_TTL
+add_enable_config CONFIG_NF_NAT
+add_enable_config CONFIG_NF_TABLES
+add_enable_config CONFIG_NF_NAT_IPV4
+add_enable_config CONFIG_NF_CONNTRACK_IPV4
+add_enable_config CONFIG_IP_NF_NAT
+add_enable_config CONFIG_NETFILTER_XT_TARGET_CHECKSUM
+add_enable_config CONFIG_NETFILTER_XTABLES
+add_enable_config CONFIG_NETFILTER_XT_MATCH_ADDRTYPE
+add_enable_config CONFIG_NETFILTER_XT_TARGET_REDIRECT
+add_enable_config CONFIG_NETFILTER_XT_TARGET_NETMAP
+add_enable_config CONFIG_NETFILTER_XT_MATCH_CONNTRACK
+add_enable_config CONFIG_BRIDGE
+add_enable_config CONFIG_BRIDGE_NETFILTER
+add_enable_config CONFIG_STAGING
+add_enable_config CONFIG_NFT_CHAIN_NAT
+add_enable_config CONFIG_NFT_COMPAT
+add_enable_config CONFIG_NFT_REDIR
+add_enable_config CONFIG_NFT_CT
+
+./scripts/config "${config_args[@]}"
 
 make olddefconfig
 
