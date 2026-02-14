@@ -69,88 +69,15 @@ singularity shell ubuntu2404.sif
 
 Singularity `--fakeroot` allows non-root users to run builds that require root-like operations (subject to host support). ([Sylabs][3])
 
-4. **Prepare the kernel tree and `.config`:**
+4. **Run the automation script (inside Singularity):**
 
-```bash
-cd WSL2-Linux-Kernel-linux-msft-wsl-${KERNELVERSION}
-cp config.txt .config          # use running config as baseline
-# or: cp Microsoft/config-wsl .config
-# append your custom options
-./scripts/config --file .config \
-    --enable CONFIG_XFS_FS \
-    --enable CONFIG_F2FS_FS \
-    --enable CONFIG_BLK_DEV_NBD \
-    --enable CONFIG_BCACHE \
-    --enable CONFIG_ANDROID \
-    --enable CONFIG_ANDROID_BINDER_IPC \
-    --set-str CONFIG_ANDROID_BINDER_DEVICES "binder,hwbinder,vndbinder" \
-    --enable CONFIG_ANDROID_BINDERFS \
-    --enable CONFIG_NETFILTER \
-    --enable CONFIG_NETFILTER_ADVANCED \
-    --enable CONFIG_IP_NF_IPTABLES \
-    --enable CONFIG_IP_NF_FILTER \
-    --enable CONFIG_IP_NF_MANGLE \
-    --enable CONFIG_IP_NF_RAW \
-    --enable CONFIG_IP_NF_TARGET_REJECT \
-    --enable CONFIG_IP_NF_TARGET_LOG \
-    --enable CONFIG_IP_NF_TARGET_MASQUERADE \
-    --enable CONFIG_IP_NF_TARGET_REDIRECT \
-    --enable CONFIG_IP_NF_MATCH_ADDRTYPE \
-    --enable CONFIG_IP_NF_MATCH_IPRANGE \
-    --enable CONFIG_IP_NF_MATCH_MAC \
-    --enable CONFIG_IP_NF_MATCH_MULTIPORT \
-    --enable CONFIG_IP_NF_MATCH_TTL \
-    --enable CONFIG_NF_NAT \
-    --enable CONFIG_NF_TABLES \
-    --enable CONFIG_NF_NAT_IPV4 \
-    --enable CONFIG_NF_CONNTRACK_IPV4 \
-    --enable CONFIG_IP_NF_NAT \
-    --enable CONFIG_NETFILTER_XT_TARGET_CHECKSUM \
-    --enable CONFIG_NETFILTER_XTABLES \
-    --enable CONFIG_NETFILTER_XT_MATCH_ADDRTYPE \
-    --enable CONFIG_NETFILTER_XT_TARGET_REDIRECT \
-    --enable CONFIG_NETFILTER_XT_TARGET_NETMAP \
-    --enable CONFIG_NETFILTER_XT_MATCH_CONNTRACK \
-    --enable CONFIG_BRIDGE \
-    --enable CONFIG_BRIDGE_NETFILTER \
-    --enable CONFIG_STAGING \
-    --enable CONFIG_NFT_CHAIN_NAT \
-    --enable CONFIG_NFT_COMPAT \
-    --enable CONFIG_NFT_REDIR \
-    --enable CONFIG_NFT_CT
-# Keep the existing .config while filling in any new Kconfig options introduced in the tree with their default values, without requiring user interaction.
-make olddefconfig
-```
-
-5. **Branding / build identity (optional):**
-
-```bash
-export KBUILD_BUILD_USER="aont"
-export KBUILD_BUILD_HOST="aont"
-```
-
-Setting those overrides what the kernel embeds for the build-user and -host. ([Kernel Document][5])
-
-6. **Build:**
-
-```bash
-make -j$(nproc)
-# artifacts: arch/x86/boot/bzImage (for WSL use)
-file arch/x86/boot/bzImage
-```
-
-After a successful build you’ll see `bzImage` and other artifacts; the version string will include `KBUILD_BUILD_USER@KBUILD_BUILD_HOST` if set.
-
-
-### Automation script (inside Singularity)
-
-If you want to automate only the steps that run *inside* the Singularity/Apptainer container (prepare `.config` + build), use:
+Use the automation script for kernel tree preparation and build steps that run *inside* the Singularity/Apptainer container:
 
 ```bash
 ./scripts/build-wsl2-kernel-in-singularity.sh -k "${KERNELVERSION}"
 ```
 
-Optional branding values can be set before execution:
+Optional branding values can still be set before execution:
 
 ```bash
 export KBUILD_BUILD_USER="aont"
@@ -160,7 +87,7 @@ export KBUILD_BUILD_HOST="aont"
 
 The script expects `config.txt` and `WSL2-Linux-Kernel-linux-msft-wsl-${KERNELVERSION}` to exist in the working directory.
 
-7. **Place the kernel and configure Windows:**
+5. **Place the kernel and configure Windows:**
 
 * Copy `arch/x86/boot/bzImage` somewhere on Windows, e.g. `C:\Users\aont\wsl\bzImage`.
 * Create or edit `%UserProfile%\.wslconfig` with:
