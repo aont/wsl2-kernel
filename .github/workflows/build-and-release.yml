@@ -1,0 +1,145 @@
+name: Build and Release WSL2 Kernel
+
+on:
+  workflow_dispatch:
+    inputs:
+      kernel_tag:
+        description: "WSL2 kernel tag from microsoft/WSL2-Linux-Kernel (e.g. linux-msft-wsl-6.6.87.2)"
+        required: true
+      release_tag:
+        description: "Release tag to create/update in this repository (defaults to kernel_tag)"
+        required: false
+  push:
+    tags:
+      - "linux-msft-wsl-*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve tags
+        id: vars
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            KERNEL_TAG='${{ inputs.kernel_tag }}'
+            RELEASE_TAG='${{ inputs.release_tag }}'
+          else
+            KERNEL_TAG='${{ github.ref_name }}'
+            RELEASE_TAG=''
+          fi
+
+          if [[ -z "$RELEASE_TAG" ]]; then
+            RELEASE_TAG="$KERNEL_TAG"
+          fi
+
+          if [[ "$KERNEL_TAG" != linux-msft-wsl-* ]]; then
+            echo "kernel_tag must start with linux-msft-wsl-" >&2
+            exit 1
+          fi
+
+          KERNEL_VERSION="${KERNEL_TAG#linux-msft-wsl-}"
+
+          echo "kernel_tag=$KERNEL_TAG" >> "$GITHUB_OUTPUT"
+          echo "kernel_version=$KERNEL_VERSION" >> "$GITHUB_OUTPUT"
+          echo "release_tag=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+
+      - name: Install build dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y \
+            bc \
+            bison \
+            build-essential \
+            cpio \
+            dwarves \
+            flex \
+            libelf-dev \
+            libncurses-dev \
+            libssl-dev \
+            qemu-utils \
+            xz-utils
+
+      - name: Download WSL2 kernel source
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fL -o kernel.tar.gz "https://github.com/microsoft/WSL2-Linux-Kernel/archive/refs/tags/${{ steps.vars.outputs.kernel_tag }}.tar.gz"
+          tar xzf kernel.tar.gz
+
+      - name: Prepare base config for build script
+        shell: bash
+        run: |
+          set -euo pipefail
+          SOURCE_DIR="WSL2-Linux-Kernel-${{ steps.vars.outputs.kernel_tag }}"
+
+          if [[ -f "${SOURCE_DIR}/Microsoft/config-wsl" ]]; then
+            cp "${SOURCE_DIR}/Microsoft/config-wsl" config.txt
+          elif [[ -f "${SOURCE_DIR}/arch/x86/configs/config-wsl" ]]; then
+            cp "${SOURCE_DIR}/arch/x86/configs/config-wsl" config.txt
+          else
+            echo "Could not find a base WSL config in ${SOURCE_DIR}" >&2
+            exit 1
+          fi
+
+      - name: Build kernel and modules
+        env:
+          KBUILD_BUILD_USER: github-actions
+          KBUILD_BUILD_HOST: github-runner
+        shell: bash
+        run: |
+          set -euo pipefail
+          chmod +x scripts/build-wsl2-kernel.sh
+          ./scripts/build-wsl2-kernel.sh -k "${{ steps.vars.outputs.kernel_version }}"
+
+      - name: Collect artifacts
+        id: artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+          SOURCE_DIR="WSL2-Linux-Kernel-${{ steps.vars.outputs.kernel_tag }}"
+          KERNEL_RELEASE="$(make -s -C "$SOURCE_DIR" kernelrelease)"
+
+          mkdir -p dist
+          cp "$SOURCE_DIR/arch/x86/boot/bzImage" "dist/bzImage-${KERNEL_RELEASE}"
+          cp "$SOURCE_DIR/modules-${KERNEL_RELEASE}.vhdx" "dist/modules-${KERNEL_RELEASE}.vhdx"
+
+          (
+            cd dist
+            sha256sum * > SHA256SUMS
+          )
+
+          echo "kernel_release=$KERNEL_RELEASE" >> "$GITHUB_OUTPUT"
+
+      - name: Upload workflow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: wsl2-kernel-${{ steps.artifacts.outputs.kernel_release }}
+          path: dist/*
+
+      - name: Create or update GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.vars.outputs.release_tag }}
+          name: WSL2 kernel ${{ steps.vars.outputs.kernel_tag }}
+          body: |
+            Built from `microsoft/WSL2-Linux-Kernel` tag `${{ steps.vars.outputs.kernel_tag }}`.
+
+            Included assets:
+            - `bzImage-${{ steps.artifacts.outputs.kernel_release }}`
+            - `modules-${{ steps.artifacts.outputs.kernel_release }}.vhdx`
+            - `SHA256SUMS`
+          files: |
+            dist/*
+          generate_release_notes: true
