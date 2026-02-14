@@ -8,7 +8,7 @@ on:
         required: true
         default: linux-msft-wsl-6.6.114.1
       release_tag:
-        description: "Release tag to create/update in this repository (defaults to {kernel_tag}-{commit id}-{date})"
+        description: "Release tag to create/update in this repository (defaults to {commit date}-{commit id}-{kernel_tag})"
         required: false
   push:
     tags:
@@ -42,7 +42,7 @@ jobs:
           if [[ -z "$RELEASE_TAG" ]]; then
             BUILD_DATE="$(date -u +%Y%m%d)"
             COMMIT_ID="${GITHUB_SHA::7}"
-            RELEASE_TAG="${KERNEL_TAG}-${COMMIT_ID}-${BUILD_DATE}"
+            RELEASE_TAG="${BUILD_DATE}-${COMMIT_ID}-${KERNEL_TAG}"
           fi
 
           if [[ "$KERNEL_TAG" != linux-msft-wsl-* ]]; then

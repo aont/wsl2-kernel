@@ -111,7 +111,7 @@ on:
         required: true
         default: linux-msft-wsl-6.6.114.1
       release_tag:
-        description: "Optional release tag in this repository"
+        description: "Optional release tag in this repository (defaults to {commit date}-{commit id}-{kernel_tag})"
         required: false
   push:
     tags:
@@ -127,7 +127,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Resolve tags
         run: |
-          # derive kernel_version and release_tag
+          # derive kernel_version and release_tag (default: {commit date}-{commit id}-{kernel_tag})
       - name: Install build dependencies
         run: |
           # apt-get install toolchain + kernel build deps
