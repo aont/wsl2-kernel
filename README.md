@@ -96,6 +96,61 @@ Restart WSL (`wsl --shutdown`) and start your distro. `.wslconfig` is the correc
 
 ---
 
+## GitHub Actions workflow (YAML description)
+
+This repository includes `.github/workflows/build-and-release.yml`, which builds a WSL2 kernel and publishes release assets automatically.
+
+```yaml
+name: Build and Release WSL2 Kernel
+
+on:
+  workflow_dispatch:
+    inputs:
+      kernel_tag:
+        description: "WSL2 kernel tag from microsoft/WSL2-Linux-Kernel"
+        required: true
+        default: linux-msft-wsl-6.6.114.1
+      release_tag:
+        description: "Optional release tag in this repository"
+        required: false
+  push:
+    tags:
+      - "linux-msft-wsl-*"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Resolve tags
+        run: |
+          # derive kernel_version and release_tag
+      - name: Install build dependencies
+        run: |
+          # apt-get install toolchain + kernel build deps
+      - name: Download WSL2 kernel source
+        run: |
+          # fetch https://github.com/microsoft/WSL2-Linux-Kernel tag tarball
+      - name: Prepare base config
+        run: |
+          # copy Microsoft/config-wsl (or arch/x86/configs/config-wsl) to config.txt
+      - name: Build kernel and modules
+        run: |
+          ./scripts/build-wsl2-kernel.sh -k "${KERNEL_VERSION}"
+      - name: Collect artifacts
+        run: |
+          # outputs: bzImage-<kernelrelease>, modules-<kernelrelease>.vhdx, SHA256SUMS
+      - uses: actions/upload-artifact@v4
+      - uses: softprops/action-gh-release@v2
+```
+
+In short: trigger manually (or by pushing a `linux-msft-wsl-*` tag), build kernel + modules from the selected Microsoft tag, upload CI artifacts, and create/update a GitHub Release containing `bzImage`, modules VHDX, and checksums.
+
+---
+
 ## Useful references
 
 * Microsoft WSL2 kernel repo (source & tags). ([GitHub][1])
