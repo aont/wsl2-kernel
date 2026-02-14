@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -euxo pipefail
 
 # Run this script *inside* the Singularity/Apptainer container.
 # Expected layout in the current directory:
