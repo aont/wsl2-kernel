@@ -114,6 +114,8 @@ add_module_config CONFIG_NFT_CHAIN_NAT
 add_module_config CONFIG_NFT_COMPAT
 add_module_config CONFIG_NFT_REDIR
 add_module_config CONFIG_NFT_CT
+add_enable_config CONFIG_MODULE_COMPRESS
+add_enable_config CONFIG_MODULE_COMPRESS_XZ
 
 ./scripts/config "${config_args[@]}"
 
