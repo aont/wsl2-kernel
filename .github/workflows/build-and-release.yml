@@ -98,8 +98,8 @@ jobs:
 
       - name: Build kernel and modules
         env:
-          KBUILD_BUILD_USER: github-actions
-          KBUILD_BUILD_HOST: github-runner
+          KBUILD_BUILD_USER: ${{ github.repository_owner }}
+          KBUILD_BUILD_HOST: github
         shell: bash
         run: |
           set -euo pipefail
