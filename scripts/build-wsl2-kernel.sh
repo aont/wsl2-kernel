@@ -78,9 +78,9 @@ add_module_config CONFIG_F2FS_FS
 add_module_config CONFIG_BLK_DEV_NBD
 add_module_config CONFIG_BCACHE
 add_enable_config CONFIG_ANDROID
-add_module_config CONFIG_ANDROID_BINDER_IPC
+add_enable_config CONFIG_ANDROID_BINDER_IPC
 config_args+=(--set-str CONFIG_ANDROID_BINDER_DEVICES "binder,hwbinder,vndbinder")
-add_module_config CONFIG_ANDROID_BINDERFS
+config_args+=(--disable CONFIG_ANDROID_BINDERFS)
 add_enable_config CONFIG_NETFILTER
 add_enable_config CONFIG_NETFILTER_ADVANCED
 add_module_config CONFIG_IP_NF_IPTABLES
