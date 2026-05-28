@@ -60,17 +60,51 @@ cd "$SOURCE_DIR"
 cp "$BASE_CONFIG" .config
 
 config_args=(--file .config)
+enabled_configs=()
+module_configs=()
+disabled_configs=()
 
 add_enable_config() {
   local symbol="$1"
 
   config_args+=(--enable "$symbol")
+  enabled_configs+=("$symbol")
 }
 
 add_module_config() {
   local symbol="$1"
 
   config_args+=(--module "$symbol")
+  module_configs+=("$symbol")
+}
+
+
+check_config_state() {
+  local symbol="$1"
+  local expected="$2"
+  local actual
+
+  actual="$(./scripts/config --file .config --state "$symbol")"
+  if [[ "$actual" != "$expected" ]]; then
+    echo "Error: $symbol expected state '$expected' but got '$actual'" >&2
+    exit 1
+  fi
+}
+
+verify_config_states() {
+  local symbol
+
+  for symbol in "${enabled_configs[@]}"; do
+    check_config_state "$symbol" y
+  done
+
+  for symbol in "${module_configs[@]}"; do
+    check_config_state "$symbol" m
+  done
+
+  for symbol in "${disabled_configs[@]}"; do
+    check_config_state "$symbol" n
+  done
 }
 
 add_module_config CONFIG_XFS_FS
@@ -81,6 +115,7 @@ add_enable_config CONFIG_ANDROID
 add_enable_config CONFIG_ANDROID_BINDER_IPC
 config_args+=(--set-str CONFIG_ANDROID_BINDER_DEVICES "binder,hwbinder,vndbinder")
 config_args+=(--disable CONFIG_ANDROID_BINDERFS)
+disabled_configs+=(CONFIG_ANDROID_BINDERFS)
 add_enable_config CONFIG_NETFILTER
 add_enable_config CONFIG_NETFILTER_ADVANCED
 add_module_config CONFIG_IP_NF_IPTABLES
@@ -118,6 +153,7 @@ add_enable_config CONFIG_MODULE_COMPRESS
 add_enable_config CONFIG_MODULE_COMPRESS_XZ
 
 ./scripts/config "${config_args[@]}"
+verify_config_states
 
 make olddefconfig
 
