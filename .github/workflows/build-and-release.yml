@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       kernel_tag:
-        description: "WSL2 kernel tag from microsoft/WSL2-Linux-Kernel (e.g. linux-msft-wsl-6.6.87.2)"
+        description: "WSL2 kernel tag from microsoft/WSL2-Linux-Kernel (e.g. linux-msft-wsl-6.18.26.3)"
         required: true
-        default: linux-msft-wsl-6.6.114.1
+        default: linux-msft-wsl-6.18.26.3
       release_tag:
         description: "Release tag to create/update in this repository (defaults to {commit date}-{commit id}-{kernel_tag})"
         required: false
