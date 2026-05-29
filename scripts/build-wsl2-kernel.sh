@@ -138,8 +138,6 @@ add_module_config CONFIG_IP_NF_TARGET_REDIRECT
 add_module_config CONFIG_IP_NF_MATCH_TTL
 add_module_config CONFIG_NF_NAT
 add_module_config CONFIG_NF_TABLES
-add_module_config CONFIG_NF_NAT_IPV4
-add_module_config CONFIG_NF_CONNTRACK_IPV4
 add_module_config CONFIG_IP_NF_NAT
 add_module_config CONFIG_NETFILTER_XT_TARGET_CHECKSUM
 add_module_config CONFIG_NETFILTER_XTABLES
@@ -150,7 +148,6 @@ add_module_config CONFIG_NETFILTER_XT_MATCH_CONNTRACK
 add_module_config CONFIG_BRIDGE
 add_module_config CONFIG_BRIDGE_NETFILTER
 add_enable_config CONFIG_STAGING
-add_module_config CONFIG_NFT_CHAIN_NAT
 add_module_config CONFIG_NFT_COMPAT
 add_module_config CONFIG_NFT_REDIR
 add_module_config CONFIG_NFT_CT
