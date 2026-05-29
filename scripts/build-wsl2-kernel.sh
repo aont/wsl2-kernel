@@ -152,9 +152,8 @@ add_enable_config CONFIG_MODULE_COMPRESS
 add_enable_config CONFIG_MODULE_COMPRESS_XZ
 
 ./scripts/config "${config_args[@]}"
-verify_config_states
-
 make olddefconfig
+verify_config_states
 
 echo "KBUILD_BUILD_USER=${KBUILD_BUILD_USER:-<not set>}"
 echo "KBUILD_BUILD_HOST=${KBUILD_BUILD_HOST:-<not set>}"
