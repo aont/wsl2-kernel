@@ -111,7 +111,6 @@ add_module_config CONFIG_XFS_FS
 add_module_config CONFIG_F2FS_FS
 add_module_config CONFIG_BLK_DEV_NBD
 add_module_config CONFIG_BCACHE
-add_enable_config CONFIG_ANDROID
 add_enable_config CONFIG_ANDROID_BINDER_IPC
 config_args+=(--set-str CONFIG_ANDROID_BINDER_DEVICES "binder,hwbinder,vndbinder")
 add_enable_config CONFIG_ANDROID_BINDERFS
