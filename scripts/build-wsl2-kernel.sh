@@ -87,24 +87,36 @@ check_config_state() {
   actual="$(./scripts/config --file .config --state "$symbol")"
   if [[ "$actual" != "$expected" ]]; then
     echo "Error: $symbol expected state '$expected' but got '$actual'" >&2
-    exit 1
+    return 1
   fi
 }
 
 verify_config_states() {
   local symbol
+  local mismatch_count=0
 
   for symbol in "${enabled_configs[@]}"; do
-    check_config_state "$symbol" y
+    if ! check_config_state "$symbol" y; then
+      ((mismatch_count += 1))
+    fi
   done
 
   for symbol in "${module_configs[@]}"; do
-    check_config_state "$symbol" m
+    if ! check_config_state "$symbol" m; then
+      ((mismatch_count += 1))
+    fi
   done
 
   for symbol in "${disabled_configs[@]}"; do
-    check_config_state "$symbol" n
+    if ! check_config_state "$symbol" n; then
+      ((mismatch_count += 1))
+    fi
   done
+
+  if ((mismatch_count > 0)); then
+    echo "Error: ${mismatch_count} config option(s) differed from the expected state" >&2
+    exit 1
+  fi
 }
 
 add_module_config CONFIG_XFS_FS
