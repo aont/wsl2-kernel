@@ -74,12 +74,30 @@ jobs:
             qemu-utils \
             xz-utils
 
-      - name: Download WSL2 kernel source
+      - name: Restore WSL2 kernel source tarball cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/wsl2-kernel-source/${{ steps.vars.outputs.kernel_tag }}.tar.gz
+          key: wsl2-kernel-source-${{ steps.vars.outputs.kernel_tag }}
+
+      - name: Download or reuse WSL2 kernel source tarball
         shell: bash
         run: |
           set -euo pipefail
-          curl -fL -o kernel.tar.gz "https://github.com/microsoft/WSL2-Linux-Kernel/archive/refs/tags/${{ steps.vars.outputs.kernel_tag }}.tar.gz"
-          tar xzf kernel.tar.gz
+
+          CACHE_DIR=".cache/wsl2-kernel-source"
+          TARBALL="${CACHE_DIR}/${{ steps.vars.outputs.kernel_tag }}.tar.gz"
+          mkdir -p "$CACHE_DIR"
+
+          if [[ -f "$TARBALL" ]]; then
+            echo "Reusing cached WSL2 kernel source tarball: $TARBALL"
+          else
+            echo "Downloading WSL2 kernel source tarball: $TARBALL"
+            curl -fL -o "${TARBALL}.tmp" "https://github.com/microsoft/WSL2-Linux-Kernel/archive/refs/tags/${{ steps.vars.outputs.kernel_tag }}.tar.gz"
+            mv "${TARBALL}.tmp" "$TARBALL"
+          fi
+
+          tar xzf "$TARBALL"
 
       - name: Prepare base config for build script
         shell: bash

@@ -101,6 +101,7 @@ Restart WSL (`wsl --shutdown`) and start your distro. `.wslconfig` is the correc
 
 This repository includes `.github/workflows/build-and-release.yml`, which builds a WSL2 kernel and publishes release assets automatically.
 In short: trigger manually (or by pushing a `linux-msft-wsl-*` tag), build kernel + modules from the selected Microsoft tag, upload CI artifacts, and create/update a GitHub Release containing `bzImage`, modules VHDX, and checksums.
+The workflow caches the downloaded, unexpanded WSL2 kernel source tarball under a key that includes the Microsoft kernel tag, so later builds for the same version reuse the cached tarball before extraction.
 
 ---
 
