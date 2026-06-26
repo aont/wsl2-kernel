@@ -7,9 +7,6 @@ on:
         description: "WSL2 kernel tag from microsoft/WSL2-Linux-Kernel (e.g. linux-msft-wsl-6.18.26.3)"
         required: true
         default: linux-msft-wsl-6.18.26.3
-      release_tag:
-        description: "Release tag to create/update in this repository (defaults to {commit date}-{commit id}-{kernel_tag})"
-        required: false
   push:
     tags:
       - "linux-msft-wsl-*"
@@ -24,6 +21,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Resolve tags
         id: vars
@@ -33,16 +32,8 @@ jobs:
 
           if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
             KERNEL_TAG='${{ inputs.kernel_tag }}'
-            RELEASE_TAG='${{ inputs.release_tag }}'
           else
             KERNEL_TAG='${{ github.ref_name }}'
-            RELEASE_TAG=''
-          fi
-
-          if [[ -z "$RELEASE_TAG" ]]; then
-            BUILD_DATE="$(date -u +%Y%m%d)"
-            COMMIT_ID="${GITHUB_SHA::7}"
-            RELEASE_TAG="${BUILD_DATE}-${COMMIT_ID}-${KERNEL_TAG}"
           fi
 
           if [[ "$KERNEL_TAG" != linux-msft-wsl-* ]]; then
@@ -51,6 +42,19 @@ jobs:
           fi
 
           KERNEL_VERSION="${KERNEL_TAG#linux-msft-wsl-}"
+          RELEASE_MAJOR_MINOR="v1.1"
+          MAX_PATCH="$(
+            git tag --list "${RELEASE_MAJOR_MINOR}.*" \
+              | sed -nE "s/^${RELEASE_MAJOR_MINOR}\.([0-9]+)$/\1/p" \
+              | sort -n \
+              | tail -n 1
+          )"
+
+          if [[ -z "$MAX_PATCH" ]]; then
+            MAX_PATCH=0
+          fi
+
+          RELEASE_TAG="${RELEASE_MAJOR_MINOR}.$((MAX_PATCH + 1))"
 
           echo "kernel_tag=$KERNEL_TAG" >> "$GITHUB_OUTPUT"
           echo "kernel_version=$KERNEL_VERSION" >> "$GITHUB_OUTPUT"
